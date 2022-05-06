@@ -63,11 +63,11 @@ class Blast(Carte) :
         self._valeur = new
 
 class Mage :
-    def __init__ (self, nom, pv, manaTotal, manaActuel, main, defausse, zoneJeu) :
+    def __init__ (self, nom, pv, manaTotal, main, defausse, zoneJeu) :
         self._nom = nom
         self._pv = pv
         self._manaTotal = manaTotal
-        self._manaActuel = manaActuel
+        self._manaActuel = manaTotal
         self._main = main
         self._defausse = defausse
         self._zoneJeu = zoneJeu
@@ -86,6 +86,9 @@ class Mage :
 
     def getManaActuel (self) :
         return self._manaActuel
+    
+    def printManaActuel (self) :
+        print(self._manaActuel)
 
     def setManaActuel (self, new) :
         self._manaActuel = new
@@ -93,15 +96,28 @@ class Mage :
     def getManaTotal (self) :
         return self._manaTotal
 
+    def printManaTotal (self) :
+        print(self._manaTotal)
+
     def setManaTotal (self, new) :
         self._manaTotal = new
 
-    def jouerCarte (self, numCarte) :
+    def printZoneJeu (self) :
+        rep = ""
+        for x in self._zoneJeu :
+            rep = rep + x.getNom() + "; "
+        return rep
+
+    def jouerCarte (self, numCarte, cible) :
         if self._main[numCarte].getMana() <= self.getManaActuel() :
             self.setManaActuel(self.getManaActuel() - self._main[numCarte].getMana())
-            if type(self._main[numCarte] == Crystal) :
+            if type(self._main[numCarte]) == Crystal :
                 self.setManaTotal(self.getManaTotal() + self._main[numCarte].getValeur())
-            self._zoneJeu.append(self._main[numCarte])
+            if type(self._main[numCarte]) == Blast :
+                cible.setPv(cible.getPv() - self._main[numCarte].getValeur())
+                self._defausse.append(self._main[numCarte])
+            else :
+                self._zoneJeu.append(self._main[numCarte])
             self._main.pop(numCarte)
         else :
             print ("Pas assez de mana !")
@@ -120,4 +136,27 @@ class Mage :
         else :
             print("Attaquant invalide")
 
-#bip boup
+    def checkVie (self) :
+        for x in self._zoneJeu :
+            if type(x) == Creature :
+                if x.getPv() < 1 :
+                    self._defausse.append(x)
+                    self._zoneJeu.remove(x)
+
+CreatureUn = Creature(2, "Goblin beurré", 'Un goblin particulièrement alcoolisé', 1, 2)
+CrystalUn = Crystal(0, "Grenat", "Une petite pierre rouge", 1)
+BlastUn = Blast(3, "Jet de bouteille", "Lancez une bouteille sur un adversaire", 3)
+JoueurUn = Mage("Bernard", 20, 3, [CreatureUn, CreatureUn, CrystalUn, BlastUn], [], [])
+JoueurDeux = Mage("Michou", 20, 3, [CreatureUn, CreatureUn, CrystalUn, BlastUn], [], [])
+
+print(JoueurUn.printZoneJeu())
+JoueurUn.jouerCarte(1, JoueurDeux)
+JoueurUn.printManaActuel()
+print(JoueurUn.printZoneJeu())
+JoueurDeux.jouerCarte(2, JoueurUn)
+print(JoueurDeux.printZoneJeu())
+print(JoueurDeux.printManaTotal())
+JoueurDeux.jouerCarte(2, JoueurUn._zoneJeu[0])
+print(JoueurDeux.printZoneJeu())
+JoueurUn.checkVie()
+print(JoueurUn.printZoneJeu())
