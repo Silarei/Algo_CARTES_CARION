@@ -119,3 +119,5 @@ class Mage :
                 print("Cible invalide")
         else :
             print("Attaquant invalide")
+
+#bip boup
